@@ -6,35 +6,42 @@ import com.v2px.mvvmcaster.R
 import com.v2px.mvvmcaster.model.RestaurantCalculator
 import com.v2px.mvvmcaster.model.TipCalculation
 
-open class CaculatorViewModel(val app: Application, val calculator: RestaurantCalculator = RestaurantCalculator()) : BaseObservable() {
+open class CaculatorViewModel @JvmOverloads constructor(
+        app: Application, val calculator: RestaurantCalculator = RestaurantCalculator()
+) : ObservableViewModel(app) {
+
+    private var lastTipCalcilated = TipCalculation()
 
     var inputCheckAmount = ""
-
     var inputTipPercentage = ""
 
-    var outputCheckAmount = ""
-    var outputTipAmount = ""
-    var outputTotalDollarAmount = ""
+    val outputCheckAmount get() = getApplication<Application>().getString(R.string.dollar_amount, lastTipCalcilated.checkAmount)
+    val outputTipAmount get()= getApplication<Application>().getString(R.string.dollar_amount, lastTipCalcilated.tipAmount)
+    val outputTotalDollarAmount get()= getApplication<Application>().getString(R.string.dollar_amount, lastTipCalcilated.grandTotal)
+    val locationName get() = lastTipCalcilated.locationName
 
     init {
         updateOutputs(TipCalculation())
     }
 
     private fun updateOutputs(tc: TipCalculation) {
-        outputCheckAmount = app.getString(R.string.dollar_amount, tc.checkAmount)
-        outputTipAmount = app.getString(R.string.dollar_amount, tc.tipAmount)
-        outputTotalDollarAmount = app.getString(R.string.dollar_amount, tc.grandTotal)
+        lastTipCalcilated = tc
+        notifyChange()
     }
 
     fun calculateTip() {
         val checkAmount = inputCheckAmount.toDoubleOrNull()
         val tipPct = inputTipPercentage.toIntOrNull()
-        println("Check Amount: $checkAmount \t Tip Percentage: $tipPct")
 
         if (checkAmount != null && tipPct != null) {
             updateOutputs(calculator.calculateTip(checkAmount, tipPct))
-            clearInputs()
         }
+    }
+
+    fun saveCurrentTip(name: String) {
+        val tipToSave = lastTipCalcilated.copy(locationName = name)
+        calculator.saveTipCalculation(tipToSave)
+        updateOutputs(tipToSave)
     }
 
     private fun clearInputs() {

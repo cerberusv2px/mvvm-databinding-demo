@@ -1,8 +1,10 @@
 package com.v2px.mvvmcaster.model
 
+import android.arch.lifecycle.LiveData
 import java.math.RoundingMode
 
-open class RestaurantCalculator {
+open class RestaurantCalculator(val repository: TipCalculationRepository = TipCalculationRepository()) {
+
     fun calculateTip(checkInput: Double, tipPctInput: Int): TipCalculation {
         val tipAmount = (checkInput * (tipPctInput.toDouble() / 100.0))
                 .toBigDecimal()
@@ -15,5 +17,17 @@ open class RestaurantCalculator {
                 tipAmount = tipAmount,
                 grandTotal = grandTotal
         )
+    }
+
+    fun saveTipCalculation(tc: TipCalculation) {
+        repository.saveTipCalculation(tc)
+    }
+
+    fun loadTipCalculationByLocation(locationName: String): TipCalculation? {
+        return repository.loadTipCalculationByName(locationName)
+    }
+
+    fun loadSavedTipCalculations(): LiveData<List<TipCalculation>> {
+        return repository.loadSavedTipCalculations()
     }
 }

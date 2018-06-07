@@ -1,5 +1,6 @@
 package com.v2px.mvvmcaster.view
 
+import android.arch.lifecycle.ViewModelProviders
 import android.databinding.DataBindingUtil
 import android.os.Bundle
 import android.support.design.widget.Snackbar
@@ -12,32 +13,41 @@ import com.v2px.mvvmcaster.viewmodel.CaculatorViewModel
 
 import kotlinx.android.synthetic.main.activity_main.*
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), SaveDialogFragment.Callback {
 
     lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
-        binding.vm = CaculatorViewModel(application)
+        binding.vm = ViewModelProviders.of(this).get(CaculatorViewModel::class.java)
         setSupportActionBar(toolbar)
 
 
     }
 
+    override fun onSaveTip(name: String) {
+        binding.vm?.saveCurrentTip(name)
+        Snackbar.make(binding.root, "Saved $name", Snackbar.LENGTH_LONG).show()
+    }
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        menuInflater.inflate(R.menu.menu_main, menu)
+        menuInflater.inflate(R.menu.menu_tip_cal, menu)
         return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         return when (item.itemId) {
-            R.id.action_settings -> true
+            R.id.action_save ->  {
+                showSaveDialog()
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    private fun showSaveDialog() {
+        val saveFragement = SaveDialogFragment()
+        saveFragement.show(supportFragmentManager, "SaveDialog")
     }
 }

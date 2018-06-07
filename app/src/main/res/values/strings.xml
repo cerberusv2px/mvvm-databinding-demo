@@ -4,4 +4,8 @@
     <string name="check_hint">Check</string>
 
     <string name="dollar_amount">$%1$.02f</string>
+
+    <string name="action_save">Save</string>
+    <string name="action_cancel">Cancel</string>
+
 </resources>
